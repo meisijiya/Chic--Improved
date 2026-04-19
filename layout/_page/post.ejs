@@ -32,6 +32,12 @@
 
     <div class="post-content"><%- page.content %></div>
 
+    <div id="highlight-nav" class="highlight-nav">
+      <span class="count">0/0</span>
+      <button onclick="scrollToHighlight(currentHighlightIndex - 1)">↑</button>
+      <button onclick="scrollToHighlight(currentHighlightIndex + 1)">↓</button>
+    </div>
+
     <% if(theme.post_copyright_enable){ %>
     <section class="post-copyright">
       <% if(theme.post_copyright_author_enable){ %>
