@@ -12,6 +12,7 @@
 <img alt="Hexo" src="https://img.shields.io/badge/Hexo-3.0+-0e83cd.svg"/>
 <img alt="Device" src="https://img.shields.io/badge/Device-responsive-orange.svg"/>
 <img alt="Build Status" src="https://img.shields.io/badge/build-passing-brightgreen"/>
+<img alt="Version" src="https://img.shields.io/badge/version-2.0-blue"/>
 </p>
 
 ## Documentation language
@@ -57,11 +58,26 @@ An elegant, powerful, easy-to-read Hexo theme.
 
 - Support MathJax, support formula written in LaTeX.
 
+### New Features
+
+- **Fixed Navbar**: Desktop navbar fixed at top with shadow effect, supports light/dark theme
+- **Container Adaptation**: Padding-top added to prevent content being obscured by fixed navbar
+- **Horizontal Overflow Fix**: Prevents horizontal scrolling on mobile devices
+- **Responsive Navigation**: Mobile and tablet (< 1024px) automatically switches to drawer menu
+- **TOC Drawer**: Side drawer table of contents with floating action button, tap outside to close
+- **Responsive Tables**: Table content wraps automatically, no overflow
+- **Code Copy Button**: Shows on hover, one-click copy with success feedback
+- **Code Block Enhancement**: Horizontal scroll support, auto adapts to light/dark theme
+- **Navbar Search**: Integrated search for desktop and mobile
+- **Website Analytics**: Integrated umami analytics
+- **Internationalization**: Complete Simplified Chinese language support
+- **Copyright Module**: Configurable copyright notice with contact information
+
 ## Installation
 
 ```bash
 cd your-blog/themes
-git clone https://github.com/Siricee/hexo-theme-Chic.git Chic
+git clone https://github.com/meisijiya/Chic--Improved.git Chic
 # Modify theme setting in _config.yml to Chic.
 ```
 

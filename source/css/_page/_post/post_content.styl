@@ -90,15 +90,19 @@
 
   table
     max-width 100%
+    width 100%
+    table-layout fixed
     margin 10px 0
     border-spacing 0
+    word-wrap break-word
     thead
       background $light-post-table-background-color
       .dark-theme &
         background $dark-post-table-background-color
     th, td
-      padding 5px 15px
+      padding 5px 8px
       border .5px solid $light-border-color
+      word-wrap break-word
 
 
   .image-caption:not(:empty)

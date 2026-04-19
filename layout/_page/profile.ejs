@@ -1,23 +1,37 @@
 <div class="container profile-container">
-    <div class="intro">
-        <div class="avatar">
-            <a href="<%- url_for(theme.nav.Posts) %>"><img src="<%- url_for(theme.avatar) %>"></a>
-        </div>
-        <div class="nickname"><%- theme.nickname %></div>
-        <div class="description"><%- markdown(theme.description) %></div>
-        <div class="links">
-            <% if (theme.links !== undefined) { %>
-                <% for (var key in theme.links){ %>
-                    <a class="link-item" title="<%- key %>" href="<%= theme.links[key] %>">
-                        <% if(theme.links_text_enable) { %>
-                            <%= key %>
-                        <%}%>
-                        <%if(theme.links_icon_enable){ %>
-                            <i class="iconfont icon-<%- key.toLowerCase() %>"></i>
-                        <%}%>
-                    </a>
-                <% } %>
-            <% } %>
-        </div>
+  <div class="intro">
+    <div style="font-size: 24px; margin-bottom: 30px; margin-top: auto">
+      <!-- 🎉10.12老婆生日🎂 -->
     </div>
+    <!-- <a
+      style="font-size: 16px; display: inline-block; margin-bottom: 30px"
+      href="https://xn--ljhfjm-dl0o.top/2025/10/12/%E8%80%81%E5%A9%8621%E5%B2%81%E7%94%9F%E6%97%A5%E5%BF%AB%E4%B9%90/"
+      >老婆戳这里，查收祝福语💗</a
+    > -->
+    <div class="profile-content">
+      <div class="avatar">
+        <a href="<%- url_for(theme.nav.Posts) %>"
+          ><img src="<%- url_for(theme.avatar) %>"
+        /></a>
+      </div>
+      <div class="nickname"><%- theme.nickname %></div>
+      <div class="description"><%- markdown(theme.description) %></div>
+      <div class="links">
+        <% if (theme.links !== undefined) { %> <% for (var key in theme.links){
+        %>
+        <a class="link-item" title="<%- key %>" href="<%= theme.links[key] %>">
+          <% if(theme.links_text_enable) { %> <%= key %> <%}%>
+          <%if(theme.links_icon_enable){ %>
+          <i class="iconfont icon-<%- key.toLowerCase() %>"></i>
+          <%}%>
+        </a>
+        <% } %> <% } %>
+      </div>
+    <!-- </div>
+      <a
+      style="font-size: 20px; display: inline-block; margin-top: 25px"
+      href="https://xn--ljhfjm-dl0o.top/布布解答/index.html"
+      >💗hi，老婆有心事吗，戳这里，布布为你解答。💗</a
+    > -->
+  </div>
 </div>

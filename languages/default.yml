@@ -1,7 +1,7 @@
-categories: Categories
-search: Search
-tags: Tags
-tagcloud: Tag Cloud
+categories: 目录分类
+search: 搜索
+tags: 标签
+tagcloud: 标签分类
 tweets: Tweets
 prev: Prev
 next: Next
@@ -12,8 +12,8 @@ page: Page %d
 recent_posts: Recent Posts
 newer: Newer
 older: Older
-share: Share
+share: 分享
 powered_by: Powered by
 rss_feed: RSS Feed
-category: Category
-tag: Tag
+category: 目录
+tag: 标签

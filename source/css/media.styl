@@ -1,5 +1,8 @@
 /* mobile phone and smart portable devices */
-@media screen and (max-width: 479px) 
+@media screen and (max-width: 1023px) 
+  body, html
+    overflow-x: hidden !important
+
   .main
     padding-top 40pt
   .navbar
@@ -139,20 +142,8 @@
           overflow: hidden
 
 
-/* iPads (portrait and landscape) ----------- */
-@media screen and (max-width: 1023px)
-  .navbar-mobile
-    display none
-
-
 /* Desktops and laptops ----------- */
 
 @media screen and (min-width: 1024px)
   .navbar-mobile
-    display none
-
-
-/* post toc Style */
-@media screen and (max-width: 1279px) // 最大宽度1279px时应用这条规则。（最大宽度小于1279px返回false，屏蔽规则。）
-  .post-toc
     display none

@@ -28,6 +28,7 @@
 @import '_page/_post/post_nav.styl';
 // partial tocbot
 @import '_page/_post/post_toc.styl';
+@import '_page/_post/post_toc_mobile.styl';
 @import '_lib/tocbot.css';
 // mobile
 @import 'media.styl';
@@ -46,3 +47,27 @@ body.dark-theme {
 // // ==============================
 // // You can override the variables in variable.styl to customize the style
 @import 'custom.styl';
+
+// 代码块滚动功能：限制高度并显示滚动条
+.highlight
+  // 核心：限制最大高度，超出部分滚动
+  max-height: 600px !important
+  overflow-y: auto !important  // 垂直滚动
+  overflow-x: auto !important  // 水平滚动（防止代码过长溢出）
+  white-space: pre !important  // 保留代码格式，不自动换行
+  height: auto !important      // 避免固定高度覆盖滚动逻辑
+
+  // 优化代码块内边距和视觉效果（可选，根据主题调整）
+  padding: 15px !important
+  border-radius: 6px !important
+
+// 暗色模式适配（如果主题支持暗色模式）
+.dark-theme
+  .highlight
+    background-color: #1e1e1e !important  // 暗色背景
+    border: 1px solid #333 !important     // 暗色边框
+
+// 响应式适配：移动端降低最大高度
+@media (max-width: 768px)
+  .highlight
+    max-height: 300px !important  // 手机端显示更少内容，避免占满屏幕

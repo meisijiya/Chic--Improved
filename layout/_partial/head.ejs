@@ -45,6 +45,18 @@ if (is_archive()){
     <link rel="stylesheet" href="<%- url_for(url) %>">
     <% }); %>
 <% } %>
+<!-- highlight.js 样式（默认亮色） -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/github.css">
+<!-- highlight.js 自动上色功能 -->
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/lib/highlight.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    hljs.highlightAll();
+});
+</script>
+
+<link rel="stylesheet" href="<%- url_for('/css/custom.css') %>">
+
 <%# javascript list %>
 <% if (theme.scripts !== undefined && theme.scripts.length > 0) { %>
     <!-- scripts list from _config.yml -->

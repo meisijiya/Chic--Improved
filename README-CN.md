@@ -12,6 +12,7 @@
 <img alt="Hexo" src="https://img.shields.io/badge/Hexo-3.0+-0e83cd.svg"/>
 <img alt="Device" src="https://img.shields.io/badge/Device-responsive-orange.svg"/>
 <img alt="Build Status" src="https://img.shields.io/badge/build-passing-brightgreen"/>
+<img alt="Version" src="https://img.shields.io/badge/version-2.0-blue"/>
 </p>
 
 ## 文档语言
@@ -54,12 +55,27 @@
 - 响应式适配移动端/桌面端。
 - 支持 MathJax，支持 LaTeX 语法的数学公式
 
+### 新增功能
+
+- **固定导航栏**：桌面端导航栏固定在顶部，添加阴影效果，支持亮色/暗色主题切换
+- **容器适配**：解决固定导航栏遮挡内容的问题，页面顶部增加适当留白
+- **横向溢出修复**：防止移动端页面出现横向滚动条
+- **响应式导航**：移动端和平板（< 1024px）自动切换为抽屉式导航菜单
+- **目录抽屉**：文章页侧边抽屉式目录，带有悬浮按钮，点击外部区域关闭
+- **表格自适应**：表格内容自动换行，不再溢出容器
+- **代码复制按钮**：悬停显示一键复制按钮，支持复制成功反馈
+- **代码块优化**：支持横向滚动，自动适配亮色/暗色主题
+- **导航栏搜索**：集成桌面端和移动端搜索功能
+- **网站统计**：集成 umami 统计功能
+- **国际化**：完整的简体中文语言支持
+- **版权模块**：可配置的版权声明，包含联系方式
+
 ## Installation 安装
 
 ```bash
 cd your-blog/themes
-git clone https://github.com/Siricee/hexo-theme-Chic.git Chic
-// Modify theme setting in _config.yml to Chic.
+git clone https://github.com/meisijiya/Chic--Improved.git Chic
+# 修改主题配置 _config.yml 中的 theme 为 Chic
 ```
 
 ## Configuration 配置
