@@ -1,7 +1,88 @@
-<%# single category page%>
+<%#
+
+%>
+
+<%
+
+function getCategoryFullName(pageBase) {
+    if (!pageBase) return page.category || '';
+    const parts = pageBase.replace(/^categories\//i, '').replace(/\/$/, '').split('/').filter(Boolean);
+    if (parts.length === 0) return page.category || '';
+    return parts.map(function(part) {
+        try { return decodeURIComponent(part); } catch(e) { return part; }
+    }).join('-');
+}
+
+function isDirectPost(cat, post) {
+    if (!post.categories) return false;
+    const cats = post.categories.toArray ? post.categories.toArray() : post.categories;
+    return cats.length > 0 && cats[cats.length - 1].name === cat.name;
+}
+
+function getDirectSubCategories(cat) {
+    const allCats = site.categories.toArray ? site.categories.toArray() : site.categories;
+    return allCats.filter(c => c.parent === cat._id);
+}
+
+function getDirectPosts(cat) {
+    return (cat.posts || []).filter(post => isDirectPost(cat, post));
+}
+
+const allCats = site.categories.toArray ? site.categories.toArray() : site.categories;
+const currentCat = page.category ? allCats.find(c => c.name === page.category) : null;
+const fullName = getCategoryFullName(page.base);
+const subCats = currentCat ? getDirectSubCategories(currentCat) : [];
+const directPosts = currentCat ? getDirectPosts(currentCat) : [];
+%>
+
+<% if (currentCat) { %>
+
 <div class="container">
-  <div class="post-wrap categories">
-    <h2 class="post-title">-&nbsp;分类&nbsp;·&nbsp;<%-page.category%>-</h2>
-  </div>
-  <%- partial('archive', {pagination: config.category, index: true}) %>
+    <div class="post-wrap categories categories-list">
+        <h2 class="post-title">-&nbsp;分类&nbsp;·&nbsp;<%- fullName %>-</h2>
+
+        <% if (subCats.length > 0) { %>
+            <div class="sub-categories-section">
+                <% subCats.forEach(subCat => { %>
+                    <a class="sub-category-item" href="<%- url_for(subCat.path) %>">
+                        <i class="iconfont icon-category" style="padding-right:3px"></i><%- subCat.name %>
+                    </a>
+                <% }); %>
+            </div>
+        <% } %>
+
+        <div class="archive">
+            <% if (directPosts.length === 0) { %>
+                <p class="empty-tip">该分类目录下暂无文章</p>
+            <% } else { %>
+            <% var last_year = ''; %>
+            <% page.posts.each(function (post) { %>
+                <% if (isDirectPost(currentCat, post)) { %>
+                    <% var cur_year = post.date.year(); %>
+                    <% if (last_year !== cur_year) { %>
+                        <h3><%- cur_year %></h3>
+                    <% last_year = cur_year; } %>
+                    <article class="archive-item">
+                        <a class="archive-item-link" href="<%- url_for(post.path) %>"><%- post.title %></a>
+                        <span class="archive-item-date"><%- date(post.date, theme.date_format) %></span>
+                    </article>
+                <% } %>
+            <% }); %>
+            <% if (directPosts.length > 10) { %>
+                <%- partial('_partial/paginator') %>
+            <% } %>
+            <% } %>
+        </div>
+    </div>
 </div>
+
+<% } else { %>
+
+<div class="container">
+    <div class="post-wrap categories">
+        <h2 class="post-title">-&nbsp;分类&nbsp;-</h2>
+        <p>分类不存在</p>
+    </div>
+</div>
+
+<% } %>

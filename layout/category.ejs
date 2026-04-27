@@ -20,41 +20,70 @@ how to add a category page:
 
  %>
 
-<% if(is_category()){ %>
-    <%- partial('_page/category', {pagination: config.category, index: true}) %>
-<% }else{ %>
+<%
+
+function isDirectPost(cat, post) {
+    if (!post.categories) return false;
+    const cats = post.categories.toArray ? post.categories.toArray() : post.categories;
+    return cats.length > 0 && cats[cats.length - 1].name === cat.name;
+}
+
+function getDirectSubCategories(cat) {
+    const allCats = site.categories.toArray ? site.categories.toArray() : site.categories;
+    return allCats.filter(c => c.parent === cat._id);
+}
+
+function getDirectPosts(cat) {
+    return (cat.posts || []).filter(post => isDirectPost(cat, post));
+}
+%>
+
+<% if (!is_category()) { %>
 
     <div class="container">
         <div class="post-wrap categories">
             <h2 class="post-title">-&nbsp;分类&nbsp;-</h2>
             <div class="categories-card">
-                <% site.categories.forEach(category_item=>{ %>
-                    <%# console.log("hehe") %>
+                <% (site.categories.toArray ? site.categories.toArray() : site.categories).filter(c => !c.parent).forEach(cat => { %>
                     <div class="card-item">
                         <div class="categories">
-                            <a href="<%- url_for(category_item.path) %>">
+                            <a href="<%- url_for(cat.path) %>">
                                 <h3>
                                     <i class="iconfont icon-category" style="padding-right:3px"></i>
-                                    <%- category_item.name %>
+                                    <%- cat.name %>
                                 </h3>
                             </a>
-                            <% category_item.posts.forEach((post_item, index = 0)=>{ %>
-                                <%# console.log(index) %>
-                                <% if(++index <= 5){ %>
+                            <% const subCats = getDirectSubCategories(cat); %>
+                            <% if (subCats.length > 0) { %>
+                                <div class="sub-category-wrap">
+                                    <% subCats.forEach(subCat => { %>
+                                        <a class="sub-category-link" href="<%- url_for(subCat.path) %>">
+                                            <i class="iconfont icon-category"></i><%- subCat.name %>
+                                        </a>
+                                    <% }); %>
+                                </div>
+                            <% } %>
+                            <% const directPosts = getDirectPosts(cat); %>
+                            <% directPosts.forEach((post_item, index = 0) => { %>
+                                <% if (++index <= 5) { %>
                                     <article class="archive-item">
                                         <a class="archive-item-link"
                                            href="<%- url_for(post_item.path) %>"><%- post_item.title %></a>
                                     </article>
                                 <% } %>
-                            <% }) %>
-                            <% if(category_item.posts.length > 5){ %>
-                                <a class="more-post-link" href="<%- url_for(category_item.path) %>">更多>></a>
+                            <% }); %>
+                            <% if (directPosts.length > 5) { %>
+                                <a class="more-post-link" href="<%- url_for(cat.path) %>">更多>></a>
                             <% } %>
                         </div>
                     </div>
-                <% }) %>
+                <% }); %>
             </div>
-
         </div>
     </div>
+
+<% } else { %>
+
+    <%- partial('_page/category', {pagination: config.category, index: true}) %>
+
 <% } %>
