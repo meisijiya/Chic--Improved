@@ -1,5 +1,13 @@
 Changelogs
 
+## 2026.5.27
+
+\[fix bugs\] fix three issues:
+
+1. **Search box not displaying at 731-931px width.** Root cause: `.nav-search-input` auto-display media query breakpoint (768px) didn't align with mobile navbar breakpoint (1023px), leaving a dead zone where the search input was hidden and the toggle icon was unreliable. Fixed by unifying all search-related mobile breakpoints to 1023px.
+2. **Highlight navigation bar not hiding when search input is cleared.** Root cause: the overridden `navSearch` function called `highlightPostContent('')` to strip marks but returned early without calling `updateHighlightCount()`, leaving the nav bar visible with stale count. Fixed by adding `updateHighlightCount()` call in the empty-keyword branch.
+3. **Long article titles overflowing on mobile archive page.** Root cause: `.archive-item-link` had `overflow:hidden` and `white-space:nowrap` but `text-overflow:ellipsis` was commented out and no `max-width` constraint was set, so text never truncated. Fixed by switching `.archive-item` to flexbox layout, activating `text-overflow:ellipsis`, and adding `min-width:0; flex:1` to enable proper flex truncation.
+
 ## 2025.4.12
 
 \[enhancement\]  
