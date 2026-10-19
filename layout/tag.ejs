@@ -27,7 +27,23 @@ how to add a tag page:
             <h2 class="post-title">-&nbsp;标签&nbsp;-</h2>
 
             <div class="tag-cloud-tags">
-                <%site.tags.forEach(item=>{%>
+                <%#
+                  标签云按「文章数倒序 + 名称升序」固定排序：site.tags 来自无序关联查询，
+                  原始顺序会随每次构建漂移，导致同一份产物里标签云顺序不同。
+                %>
+                <%
+                var sortedCloudTags = (site.tags && site.tags.toArray ? site.tags.toArray() : (site.tags || []))
+                    .slice()
+                    .sort(function (a, b) {
+                        const la = (a && a.length) || 0;
+                        const lb = (b && b.length) || 0;
+                        if (la !== lb) return lb - la;
+                        const na = String(a && a.name || '');
+                        const nb = String(b && b.name || '');
+                        return na < nb ? -1 : (na > nb ? 1 : 0);
+                    });
+                %>
+                <%sortedCloudTags.forEach(item=>{%>
                     <a href="<%-url_for(item.path)%>"><%- item.name%><small>(<%-item.length%>)</small></a>
                 <%})%>
             </div>

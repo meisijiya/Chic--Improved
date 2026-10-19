@@ -39,19 +39,43 @@ function getCategoryTreeIds(cat, allCats) {
     return ids;
 }
 
+// 按名称固定排序：site.categories 来自无序关联查询，原始顺序会随每次构建漂移
+function byCategoryName(a, b) {
+    const na = String(a && a.name || '');
+    const nb = String(b && b.name || '');
+    if (na < nb) return -1;
+    if (na > nb) return 1;
+    return 0;
+}
+
+// 文章按发布时间倒序；同一时间再按标题排序，保证每次构建结果一致
+function byDateDesc(a, b) {
+    const ta = a && a.date ? a.date.valueOf() : 0;
+    const tb = b && b.date ? b.date.valueOf() : 0;
+    if (ta !== tb) return tb - ta;
+    const sa = String(a && (a.title || a.name) || '');
+    const sb = String(b && (b.title || b.name) || '');
+    if (sa < sb) return -1;
+    if (sa > sb) return 1;
+    return 0;
+}
+
 // 只取直接子级，用于渲染二级分类链接
 function getDirectSubCategories(cat, allCats) {
-    return allCats.filter(c => c.parent === cat._id);
+    return allCats.filter(c => c.parent === cat._id).sort(byCategoryName);
 }
 
 // cat 自身 + 全部子孙分类下的文章；按 category 的 _id 判断，不依赖 categories 数组的顺序
+// 注意：cat.posts 是 warehouse 的 Query，它的 sort() 只接受字段名/对象，不接受比较函数，
+// 所以先 toArray() 取成普通数组，再用 Array.prototype.sort 按时间倒序 + 标题兜底排序。
 function getCategoryPosts(cat, allCats) {
     const ids = getCategoryTreeIds(cat, allCats);
-    return (cat.posts || []).filter(post => {
+    const allPosts = cat.posts && cat.posts.toArray ? cat.posts.toArray() : (cat.posts || []);
+    return allPosts.filter(post => {
         if (!post.categories) return false;
         const cats = post.categories.toArray ? post.categories.toArray() : post.categories;
         return cats.some(c => ids.has(c._id));
-    });
+    }).sort(byDateDesc);
 }
 
 const allCats = site.categories.toArray ? site.categories.toArray() : site.categories;
@@ -63,7 +87,7 @@ const allCats = site.categories.toArray ? site.categories.toArray() : site.categ
         <div class="post-wrap categories">
             <h2 class="post-title">-&nbsp;分类&nbsp;-</h2>
             <div class="categories-card">
-                <% allCats.filter(c => !c.parent).forEach(cat => { %>
+                <% allCats.filter(c => !c.parent).sort(byCategoryName).forEach(cat => { %>
                     <div class="card-item">
                         <div class="categories">
                             <a href="<%- url_for(cat.path) %>">

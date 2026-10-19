@@ -1,3 +1,14 @@
+<%
+// 标签按名称固定排序：hexo 的 post.tags 来自无序关联查询，原始顺序会随每次构建漂移，
+// 导致同一篇文章在不同构建产物里标签顺序不同、部署 diff 出现噪声。
+var sortedPostTags = (page.tags && page.tags.toArray ? page.tags.toArray() : (page.tags || []))
+  .slice()
+  .sort(function (a, b) {
+    var na = String(a && a.name || '');
+    var nb = String(b && b.name || '');
+    return na < nb ? -1 : (na > nb ? 1 : 0);
+  });
+%>
 <div class="container">
   <%# toc %> <%if(theme.post_toc_enable && toc(page.content).length!==0){%> <%-
   partial('_partial/toc') %> <%-
@@ -81,7 +92,7 @@
       <div>
         <span>标签:</span>
         <span class="tag">
-          <% if(page.tags.length!==0){%> <% page.tags.forEach(item=>{ %>
+          <% if(page.tags.length!==0){%> <% sortedPostTags.forEach(item=>{ %>
           <a href="<%- url_for(item.path) %>"># <%- item.name %></a>
           <% }) %> <% } %>
         </span>
