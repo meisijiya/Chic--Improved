@@ -10,9 +10,11 @@
     > -->
     <div class="profile-content">
       <div class="avatar">
-        <a href="<%- url_for(theme.nav.Posts) %>"
-          ><img src="<%- url_for(theme.avatar) %>"
-        /></a>
+        <!-- 归档页键名随 _config.yml 的 nav 配置而定，缺失时回落到站点根，避免 url_for(undefined) -->
+        <% var archivePath = (theme.nav && theme.nav['归档']) || config.root %>
+        <a href="<%- url_for(archivePath) %>"
+          ><img src="<%- url_for(theme.avatar) %>" alt="<%- theme.nickname %>"
+            loading="eager" decoding="async" /></a>
       </div>
       <div class="nickname"><%- theme.nickname %></div>
       <div class="description"><%- markdown(theme.description) %></div>

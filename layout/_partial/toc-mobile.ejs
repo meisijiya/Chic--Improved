@@ -1,6 +1,6 @@
-<div class="toc-mobile-fab" onclick="toggleMobileToc()">
-  <span class="toc-mobile-icon">☰</span>
-</div>
+<button type="button" class="toc-mobile-fab" aria-label="打开文章目录" aria-expanded="false" onclick="toggleMobileToc()">
+  <span class="toc-mobile-icon" aria-hidden="true">☰</span>
+</button>
 
 <div class="toc-mobile-overlay" onclick="toggleMobileToc()"></div>
 
@@ -56,11 +56,13 @@
       overlay.classList.remove('active');
       drawer.classList.remove('active');
       fab.classList.remove('active');
+      fab.setAttribute('aria-expanded', 'false');
       document.body.style.overflow = '';
     } else {
       overlay.classList.add('active');
       drawer.classList.add('active');
       fab.classList.add('active');
+      fab.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';
     }
   }

@@ -3,5 +3,10 @@
         <span>© <%= config.author %> | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
     </div>
 </footer>
-<script src="/js/code-copy.js"></script>
+<%# 代码块一键复制：脚本本体由站点提供（site/source/js/code-copy.js 或主题 source/js/），
+    主题只负责挂载。用 url_for() 以适配子路径部署（root 非 / 时裸 /js/... 会 404）。
+    不需要该功能的站点可在 _config.yml 里设 code_copy: false 关闭，避免一次静默 404 请求。 %>
+<% if (theme.code_copy !== false) { %>
+<script src="<%- url_for('/js/code-copy.js') %>"></script>
+<% } %>
 

@@ -33,9 +33,9 @@
     <div class="post-content"><%- page.content %></div>
 
     <div id="highlight-nav" class="highlight-nav">
-      <span class="count">0/0</span>
-      <button onclick="scrollToHighlight(currentHighlightIndex - 1)">↑</button>
-      <button onclick="scrollToHighlight(currentHighlightIndex + 1)">↓</button>
+      <span class="count" aria-live="polite">0/0</span>
+      <button type="button" aria-label="上一个高亮" onclick="scrollToHighlight(currentHighlightIndex - 1)"><span aria-hidden="true">↑</span></button>
+      <button type="button" aria-label="下一个高亮" onclick="scrollToHighlight(currentHighlightIndex + 1)"><span aria-hidden="true">↓</span></button>
     </div>
 
     <% if(theme.post_copyright_enable){ %>

@@ -22,20 +22,39 @@ how to add a category page:
 
 <%
 
-function isDirectPost(cat, post) {
-    if (!post.categories) return false;
-    const cats = post.categories.toArray ? post.categories.toArray() : post.categories;
-    return cats.length > 0 && cats[cats.length - 1].name === cat.name;
+// site.categories 是一棵树（c.parent 指向父级 _id），迭代收集 cat 自身 + 全部子孙分类的 _id
+function getCategoryTreeIds(cat, allCats) {
+    const ids = new Set([cat._id]);
+    let found = true;
+    while (found) {
+        found = false;
+        for (let i = 0; i < allCats.length; i++) {
+            const child = allCats[i];
+            if (child.parent && ids.has(child.parent) && !ids.has(child._id)) {
+                ids.add(child._id);
+                found = true;
+            }
+        }
+    }
+    return ids;
 }
 
-function getDirectSubCategories(cat) {
-    const allCats = site.categories.toArray ? site.categories.toArray() : site.categories;
+// 只取直接子级，用于渲染二级分类链接
+function getDirectSubCategories(cat, allCats) {
     return allCats.filter(c => c.parent === cat._id);
 }
 
-function getDirectPosts(cat) {
-    return (cat.posts || []).filter(post => isDirectPost(cat, post));
+// cat 自身 + 全部子孙分类下的文章；按 category 的 _id 判断，不依赖 categories 数组的顺序
+function getCategoryPosts(cat, allCats) {
+    const ids = getCategoryTreeIds(cat, allCats);
+    return (cat.posts || []).filter(post => {
+        if (!post.categories) return false;
+        const cats = post.categories.toArray ? post.categories.toArray() : post.categories;
+        return cats.some(c => ids.has(c._id));
+    });
 }
+
+const allCats = site.categories.toArray ? site.categories.toArray() : site.categories;
 %>
 
 <% if (!is_category()) { %>
@@ -44,7 +63,7 @@ function getDirectPosts(cat) {
         <div class="post-wrap categories">
             <h2 class="post-title">-&nbsp;分类&nbsp;-</h2>
             <div class="categories-card">
-                <% (site.categories.toArray ? site.categories.toArray() : site.categories).filter(c => !c.parent).forEach(cat => { %>
+                <% allCats.filter(c => !c.parent).forEach(cat => { %>
                     <div class="card-item">
                         <div class="categories">
                             <a href="<%- url_for(cat.path) %>">
@@ -53,7 +72,7 @@ function getDirectPosts(cat) {
                                     <%- cat.name %>
                                 </h3>
                             </a>
-                            <% const subCats = getDirectSubCategories(cat); %>
+                            <% const subCats = getDirectSubCategories(cat, allCats); %>
                             <% if (subCats.length > 0) { %>
                                 <div class="sub-category-wrap">
                                     <% subCats.forEach(subCat => { %>
@@ -63,17 +82,15 @@ function getDirectPosts(cat) {
                                     <% }); %>
                                 </div>
                             <% } %>
-                            <% const directPosts = getDirectPosts(cat); %>
-                            <% directPosts.forEach((post_item, index = 0) => { %>
-                                <% if (++index <= 5) { %>
-                                    <article class="archive-item">
-                                        <a class="archive-item-link"
-                                           href="<%- url_for(post_item.path) %>"><%- post_item.title %></a>
-                                    </article>
-                                <% } %>
+                            <% const catPosts = getCategoryPosts(cat, allCats); %>
+                            <% catPosts.slice(0, 5).forEach(post_item => { %>
+                                <article class="archive-item">
+                                    <a class="archive-item-link"
+                                       href="<%- url_for(post_item.path) %>"><%- post_item.title %></a>
+                                </article>
                             <% }); %>
-                            <% if (directPosts.length > 5) { %>
-                                <a class="more-post-link" href="<%- url_for(cat.path) %>">更多>></a>
+                            <% if (catPosts.length > 5) { %>
+                                <a class="more-post-link" href="<%- url_for(cat.path) %>">更多&gt;&gt;</a>
                             <% } %>
                         </div>
                     </div>
@@ -84,6 +101,12 @@ function getDirectPosts(cat) {
 
 <% } else { %>
 
-    <%- partial('_page/category', {pagination: config.category, index: true}) %>
+    <%# 分类工具函数只有这一份定义，通过 partial locals 传给 _page/category 复用 %>
+    <%- partial('_page/category', {
+        pagination: config.category,
+        index: true,
+        getDirectSubCategories: getDirectSubCategories,
+        getCategoryPosts: getCategoryPosts
+    }) %>
 
 <% } %>

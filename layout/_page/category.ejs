@@ -13,26 +13,32 @@ function getCategoryFullName(pageBase) {
     }).join('-');
 }
 
-function isDirectPost(cat, post) {
-    if (!post.categories) return false;
-    const cats = post.categories.toArray ? post.categories.toArray() : post.categories;
-    return cats.length > 0 && cats[cats.length - 1].name === cat.name;
-}
+// getDirectSubCategories / getCategoryPosts 由 layout/category.ejs 定义后经 partial locals 传入，此处不再重复定义
 
-function getDirectSubCategories(cat) {
-    const allCats = site.categories.toArray ? site.categories.toArray() : site.categories;
-    return allCats.filter(c => c.parent === cat._id);
-}
-
-function getDirectPosts(cat) {
-    return (cat.posts || []).filter(post => isDirectPost(cat, post));
+// 把 url / base 归一化成可比较的分类路径：
+// 去首尾斜杠 → 逐段 percent-decode（非法编码回退原值）→ 剥掉分页段 page/<数字> → 重新拼接
+function normalizeCategoryPath(p) {
+    if (!p) return '';
+    const parts = String(p).split('/').filter(Boolean).map(function(part) {
+        try { return decodeURIComponent(part); } catch(e) { return part; }
+    });
+    while (parts.length && /^page$/i.test(parts[parts.length - 2] || '') && /^\d+$/.test(parts[parts.length - 1] || '')) {
+        parts.length -= 2;
+    }
+    return parts.join('/');
 }
 
 const allCats = site.categories.toArray ? site.categories.toArray() : site.categories;
-const currentCat = page.category ? allCats.find(c => c.name === page.category) : null;
+// hexo 的分类唯一性是 (name, parent) 二元组，存在「同名不同父」的节点（如 后端开发/数据库 与 运维与中间件/数据库），
+// 只用 name 定位会命中错误节点（表现为静默空白页），因此统一按归一化后的 path 匹配
+const currentPath = normalizeCategoryPath(page.base);
+const currentCat = currentPath
+    ? allCats.find(c => normalizeCategoryPath(c.path) === currentPath)
+    : null;
 const fullName = getCategoryFullName(page.base);
-const subCats = currentCat ? getDirectSubCategories(currentCat) : [];
-const directPosts = currentCat ? getDirectPosts(currentCat) : [];
+const subCats = currentCat ? getDirectSubCategories(currentCat, allCats) : [];
+const catPosts = currentCat ? getCategoryPosts(currentCat, allCats) : [];
+const catPostIds = new Set(catPosts.map(p => p._id));
 %>
 
 <% if (currentCat) { %>
@@ -52,12 +58,12 @@ const directPosts = currentCat ? getDirectPosts(currentCat) : [];
         <% } %>
 
         <div class="archive">
-            <% if (directPosts.length === 0) { %>
+            <% if (catPosts.length === 0) { %>
                 <p class="empty-tip">该分类目录下暂无文章</p>
             <% } else { %>
             <% var last_year = ''; %>
             <% page.posts.each(function (post) { %>
-                <% if (isDirectPost(currentCat, post)) { %>
+                <% if (catPostIds.has(post._id)) { %>
                     <% var cur_year = post.date.year(); %>
                     <% if (last_year !== cur_year) { %>
                         <h3><%- cur_year %></h3>
@@ -68,7 +74,8 @@ const directPosts = currentCat ? getDirectPosts(currentCat) : [];
                     </article>
                 <% } %>
             <% }); %>
-            <% if (directPosts.length > 10) { %>
+            <%# 分页器跟随 hexo 实际切出的当页数据：page.total 是总页数，> 1 才有多页 %>
+            <% if (page.total > 1) { %>
                 <%- partial('_partial/paginator') %>
             <% } %>
             <% } %>

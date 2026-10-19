@@ -31,6 +31,8 @@
     script.setAttribute("data-lang", "zh-CN"); // 中文界面
     script.setAttribute("crossorigin", "anonymous"); // 跨域资源安全
     script.async = true;
+    // 本次重建的脚本加载完毕后再冲刷可能被连击守卫拦下的待办，保证评论区最终与当前主题一致
+    script.addEventListener("load", flushGiscusRebuild);
 
     giscusContainer.appendChild(script);
   }
@@ -39,31 +41,49 @@
     return document.body.classList.contains("dark-theme") ? "dark" : "light";
   }
 
+  // 连击守卫的时间窗口（毫秒），理由见 requestGiscusRebuild 的注释
+  const GISCUS_REBUILD_THROTTLE = 800;
+  let lastGiscusRebuildAt = 0; // 上次真正发起重建的时刻，初值 0 保证首次必定放行
+  let giscusRebuildPending = false; // 窗口内被拦下的点击合并成一个待办，最多补建一次
+
+  /**
+   * 申请重建 giscus，并做连击合并。
+   * 每次重建都会清空容器并重载一次 giscus iframe，代价不低；用户连续点击主题开关时，
+   * 不应把每一次点击都变成一次重建。这里用「时间窗口 + pending 标记」合并：
+   *   - 距上次重建已超过阈值：立即重建；
+   *   - 落在窗口内：只置 pending，既不重建也不排队，因此最多只会补建最后一次。
+   * 补建时机有两处，保证不会漏掉：当前这次重建脚本的 load 事件，或用户的下一次点击。
+   * 阈值取 800ms：人连续点击的间隔通常在 150–300ms，800ms 足以把一串快速连点合并成一次；
+   * 同时它短于「切完主题停下来看一眼评论区」的自然停顿，不会吞掉一次有意识的切换。
+   */
+  function requestGiscusRebuild() {
+    giscusRebuildPending = true;
+    flushGiscusRebuild();
+  }
+
+  /** 若有待办且已过时间窗口，则按当前主题重建一次并清掉待办。 */
+  function flushGiscusRebuild() {
+    if (!giscusRebuildPending) return;
+    if (Date.now() - lastGiscusRebuildAt < GISCUS_REBUILD_THROTTLE) return;
+    giscusRebuildPending = false;
+    lastGiscusRebuildAt = Date.now();
+    createGiscus(getCurrentTheme());
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     // 页面首次加载，根据当前主题挂载评论
-    createGiscus(getCurrentTheme());
+    requestGiscusRebuild();
 
-    // 监听按钮点击切换主题 → 重载评论区
-    const buttons = [
-      document.querySelector(".toggleBtn"),
-      document.getElementById("mobile-toggle-theme"),
-    ];
-    buttons.forEach((btn) => {
-      if (!btn) return;
-      btn.addEventListener("click", () => {
-        setTimeout(() => {
-          createGiscus(getCurrentTheme());
-        }, 400); // 稍作延迟，确保 class 切换完毕
-      });
-    });
-
-    // 监听 body class 改变（保险方案）
-    const observer = new MutationObserver(() => {
-      createGiscus(getCurrentTheme());
-    });
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ["class"],
+    // 主题切换只保留这一条触发路径：按钮点击。
+    // script.js 的 _Blog.toggleTheme 是同步 classList.add/remove('dark-theme')，
+    // 所以本监听执行时新主题的 class 一定已经写好，直接读即可，无需任何延时等待。
+    // 监听挂在 document 的冒泡阶段，保证排在这个按钮自身的处理器之后执行——
+    // 无论两个脚本谁先注册监听，读到的都是切换完成后的 class，不会读旧值。
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!target || typeof target.closest !== "function") return;
+      if (!target.closest(".toggleBtn, #mobile-toggle-theme")) return;
+      requestGiscusRebuild();
     });
   });
 </script>
