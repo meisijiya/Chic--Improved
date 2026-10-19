@@ -46,7 +46,9 @@ body.dark-theme {
 // // Custom style
 // // ==============================
 // // You can override the variables in variable.styl to customize the style
-@import 'custom.styl';
+// 注意：custom.styl 已删除。它与 custom.css 都会输出到 /css/custom.css，
+// 并发写盘时谁赢不确定，会导致构建产物在「有内容」和「0 字节」之间摇摆。
+// 自定义样式统一由 source/css/custom.css 提供，head.ejs 直接引用该文件。
 
 // 代码块滚动功能：限制高度并显示滚动条
 .highlight
