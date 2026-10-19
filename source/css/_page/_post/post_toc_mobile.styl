@@ -174,7 +174,9 @@ $font-size-20 = 1.25rem
       &::before
         background-color $dark-post-link-color
 
-@media screen and (max-width: 1279px)
+// 断点统一：原为 1279px，与 navbar 切换点（1023px）及 category.styl 的 768px 都不一致。
+// 统一到 1023px：≤1023px 用抽屉式目录，≥1024px 用右侧固定目录。
+@media screen and (max-width: 1023px)
   .toc-mobile-fab
     display block
 

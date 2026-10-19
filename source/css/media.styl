@@ -1,10 +1,18 @@
 /* mobile phone and smart portable devices */
 @media screen and (max-width: 1023px) 
-  body, html
-    overflow-x: hidden !important
+  // U5：原先此处有 `body, html { overflow-x: hidden !important }`，
+  // 与 base.styl 的 `body { overflow-x: hidden }` 重复且是补丁式写法，已删除。
+  // overflow 设在 body 上会传播到 viewport，html 无需再设一遍。
 
+  // 固定导航栏是 fork 的改动（.navbar { position: fixed }），.main 的 padding-top 是它的补偿。
+  // 桌面端 .navbar 高 4rem（见 layout.styl 的 .main .container padding-top 4rem）；
+  // 移动端换成 .navbar-mobile，其高度由 .container 的 line-height 5.5em 决定（≈81px @11pt），
+  // 原来的 20pt 与 .container 的 4rem 叠加成 ~91px，比导航栏本身还高，多出一截空白。
+  // 这里把移动端补偿收敛成单一来源：.main 承担 5.5em，.container 的 4rem 归零。
   .main
-    padding-top 20pt
+    padding-top 5.5em
+    .container
+      padding-top 0
   .navbar
     display: none
 
@@ -95,10 +103,20 @@
           margin 0 1em
           line-height: 2.5em
         &.active 
-          display: block
-          white-space nowrap
-          box-sizing border-box
-          overflow-x auto
+          // U7：原先是 block + nowrap + overflow-x auto，菜单项被强制排成一行，
+          // 390px 视口下 scrollWidth 632 / clientWidth 390，溢出 242px，
+          // 溢出部分又被 overflow-x:hidden 掩盖成「能看但点不到」。
+          // 改为可换行的 flex 布局，菜单项按可用宽度自然折行。
+          display: flex
+          flex-wrap: wrap
+          justify-content: center
+          align-items: center
+          box-sizing: border-box
+          // 搜索容器独占一行，不与菜单项抢宽度
+          .mobile-container
+            flex: 0 0 100%
+            margin-left 0
+            max-width 100%
 
         .dark-theme & 
           background: $dark-background-color

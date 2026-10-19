@@ -72,12 +72,8 @@ An elegant, powerful, easy-to-read Hexo theme.
 - **Website Analytics**: Integrated umami analytics
 - **Internationalization**: Complete Simplified Chinese language support
 - **Copyright Module**: Configurable copyright notice with contact information
-
-### Recent Fixes (2026.5.27)
-
-- **Search box display fix**: Fixed search input not appearing at 731-931px viewport widths. Unified mobile breakpoints to 1023px to match navbar behavior.
-- **Highlight nav dismiss fix**: Fixed the highlight navigation bar persisting after clearing the search input. Now hides immediately when input is emptied.
-- **Archive title overflow fix**: Fixed long article titles overflowing on mobile archive page. Switched to flexbox layout with `text-overflow: ellipsis` for proper truncation.
+- **Lazy Search Index**: The (multi-MB) `search.xml` index is fetched on first interaction — clicking the search icon or focusing the input — instead of on page load
+- **Accessibility**: The mobile TOC button and the in-article highlight jump buttons are native `<button>` elements with `aria-label` / `aria-expanded`; the highlight counter is announced via `aria-live`
 
 ## Installation
 

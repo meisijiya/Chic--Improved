@@ -95,7 +95,11 @@
           background #3a3a3a
           color #fff
 
-@media screen and (max-width: 768px)
+// 断点统一：原为 768px，与 media.styl / post_toc_mobile.styl 的 1023px 不一致。
+// 统一到 1023px 后，769–1023px 区间的 .card-item 仍是 width 100%
+// （media.styl 的 1023px 块里已有 `.categories .categories-card .card-item { width 100% }`），
+// 两处断点合并为同一套。
+@media screen and (max-width: 1023px)
   .post-wrap
     .categories-card
       padding 0 1em

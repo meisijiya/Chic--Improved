@@ -20,6 +20,9 @@ body
   font-size 11pt
   font-weight normal
   line-height 2em
+  // U5：横向溢出只在这一处收敛即可。overflow 设在 body 上会传播到 viewport，
+  // 所以 html 不需要再写一遍（media.styl 里的 `body, html { overflow-x: hidden !important }` 已删除）。
+  // 注意：body 的裁剪管不到 position: fixed 的元素（移动端固定导航栏属于这一类）。
   overflow-x: hidden
   background-color $light-background-color
   color $light-font-color

@@ -67,7 +67,7 @@ body.dark-theme {
     background-color: #1e1e1e !important  // 暗色背景
     border: 1px solid #333 !important     // 暗色边框
 
-// 响应式适配：移动端降低最大高度
-@media (max-width: 768px)
+// 响应式适配：窄屏降低代码块最大高度（断点与全站 media.styl 保持一致：1023px）
+@media (max-width: 1023px)
   .highlight
-    max-height: 300px !important  // 手机端显示更少内容，避免占满屏幕
+    max-height: 300px !important  // 窄屏显示更少内容，避免占满屏幕（超出部分可滚动）
