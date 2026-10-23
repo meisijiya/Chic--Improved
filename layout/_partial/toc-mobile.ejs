@@ -17,7 +17,7 @@
     var overlay = document.querySelector('.toc-mobile-overlay');
     var drawer = document.querySelector('.toc-mobile-drawer');
     var fab = document.querySelector('.toc-mobile-fab');
-    
+
     if (overlay.classList.contains('active')) {
       overlay.classList.remove('active');
       drawer.classList.remove('active');
@@ -32,4 +32,16 @@
       document.body.style.overflow = 'hidden';
     }
   }
+
+  // 点抽屉里的目录项时先收起抽屉，再由 tocbot 做平滑滚动。
+  // 监听挂在 document 的捕获阶段：它早于 tocbot 挂在 body 上的冒泡监听，
+  // 这样抽屉关掉、body 的 overflow 复位之后，滚动目标才是最终布局里的位置。
+  document.addEventListener('click', function (e) {
+    var link = e.target && e.target.closest
+      ? e.target.closest('.tocbot-list-mobile .toc-link')
+      : null;
+    if (!link) return;
+    var overlay = document.querySelector('.toc-mobile-overlay');
+    if (overlay && overlay.classList.contains('active')) toggleMobileToc();
+  }, true);
 </script>
