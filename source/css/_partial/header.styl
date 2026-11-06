@@ -1,5 +1,31 @@
 header
   user-select none
+
+  // 返回按钮：桌面在右侧菜单区，移动端紧靠折叠菜单（.navbar-actions 把两者并列）
+  .nav-back
+    display inline-flex
+    align-items center
+    gap 0.25em
+    line-height 1
+    color $light-font-color
+    .nav-back-icon
+      width 20px
+      height 20px
+      display block
+    span
+      font-size 14px
+    &:hover
+      color $light-post-link-color
+    .dark-theme &
+      color $dark-font-color
+      &:hover
+        color $dark-global-link-hover-color
+
+  .navbar-actions
+    display flex
+    align-items center
+    gap 0.5em
+
   .menu
     display flex
     align-items center
