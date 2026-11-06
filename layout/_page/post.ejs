@@ -9,8 +9,13 @@ var sortedPostTags = (page.tags && page.tags.toArray ? page.tags.toArray() : (pa
     return na < nb ? -1 : (na > nb ? 1 : 0);
   });
 %>
-<div class="container">
-  <%# toc %> <%if(theme.post_toc_enable && toc(page.content).length!==0){%> <%-
+<%
+// 有目录时给容器加 with-toc：平板/小桌面宽度下容器切成两栏，目录回到文档流，
+// 避免固定定位的 15rem 侧栏压住居中的 780px 正文（见 post_toc.styl）。
+var hasToc = theme.post_toc_enable && toc(page.content).length !== 0;
+%>
+<div class="container<%= hasToc ? ' with-toc' : '' %>">
+  <%# toc %> <%if(hasToc){%> <%-
   partial('_partial/toc') %> <%-
   partial('_partial/toc-mobile') %> <%}%> <%# article %>
   <article class="post-wrap">

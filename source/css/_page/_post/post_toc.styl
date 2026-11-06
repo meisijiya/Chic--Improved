@@ -71,6 +71,19 @@ $font-size-32= 2rem
       cursor pointer
     a:hover 
       color gray
-    
-  
 
+// 平板/小桌面（1024~1359px）：正文 780px 居中，固定侧栏占 right 2em + 15rem，
+// 视口窄于 1324px 时两者必然重叠。这一段把容器切成流式两栏，目录回文档流并 sticky 跟随。
+// 1360px 起空间够用，仍走上面的 fixed 定位；≤1023px 走移动抽屉（post_toc_mobile.styl）。
+@media screen and (min-width: 1024px) and (max-width: 1359px)
+  .main .container.with-toc
+    flex-direction row
+    justify-content center
+    align-items flex-start
+  .post-toc
+    position sticky
+    top 5rem
+    right auto
+    flex 0 0 $post-toc-width
+    order 2
+    margin-left 1em
