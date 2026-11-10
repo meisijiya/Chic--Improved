@@ -1,349 +1,92 @@
-<h1 align="center"><a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic Theme</a></h1>
+<h1 align="center">Chic (personal fork)</h1>
 
 <p align="center">
-<img src="https://i.loli.net/2019/06/12/5d006bd289aa325037.png" alt="Chic theme">
+Forked from <a href="https://github.com/Siricee/hexo-theme-Chic">Siricee/hexo-theme-Chic</a>. This repository is the theme version actually running on <a href="https://meisijiya.site">meisijiya.site</a>.
 </p>
 
-> Chic, French word meaning 'Elegant' in English.
+> The differences from upstream are not a one-off migration but the maintained state: search became a command-panel UI backed by a build-time segmented index, and the TOC layout, accessibility and build reproducibility were adjusted for this site.
 
-<p align="center">
-<img alt="Author" src="https://img.shields.io/badge/Author-Sirice-lightgray.svg"/>
-<img alt="Node" src="https://img.shields.io/badge/Node-6.0%2B-43853d.svg"/>
-<img alt="Hexo" src="https://img.shields.io/badge/Hexo-3.0+-0e83cd.svg"/>
-<img alt="Device" src="https://img.shields.io/badge/Device-responsive-orange.svg"/>
-<img alt="Build Status" src="https://img.shields.io/badge/build-passing-brightgreen"/>
-<img alt="Version" src="https://img.shields.io/badge/version-2.0-blue"/>
-</p>
+- Upstream theme: <https://github.com/Siricee/hexo-theme-Chic>
+- This fork: <https://github.com/meisijiya/Chic--Improved>
+- Usage: a git submodule mounted at `themes/Chic` in the blog repository
+- The full option set documented by upstream (nav, sidebar links, copyright, MathJax, date formats…) still applies. This file only records **what this fork does differently**.
 
-## Documentation language
+## What this fork adds
 
-- [中文文档](README-CN.md)
-- [English](README.md)
+| Feature | Files | Notes |
+|---|---|---|
+| Search panel | `source/js/search-panel.js`, `source/css/search-panel.css`, `layout/_partial/header.ejs` | Navbar magnifier opens a floating panel with three responsive shapes (phone bottom drawer / tablet centered card / desktop top-aligned). Results are grouped (title / tags / category paths / in-article headings / body) with collapsible groups and paged “more candidates” |
+| Build-time index | `scripts/search-index.js`, `search-index.baseline.json` | Emits `public/search/`: `manifest` + `meta` + `ascii`/`cn` inverted indexes + per-article body shards. File names are content-hashed and ASCII-only |
+| In-page highlight | `source/js/search.js`, `layout/_page/post.ejs` | Results link to `?sq=<keyword>#<section-anchor>`; the landing page highlights the whole article and shows “N/M” with ↑ ↓ and a close button |
+| Back link | `layout/_partial/header.ejs` | `← 返回` returns to the same-origin `document.referrer` |
+| TOC layout | `layout/_partial/toc*.ejs`, `source/css/_page/_post/*.styl` | Tablet widths use a flowing two-column layout (the fixed sidebar no longer overlaps text); the mobile drawer closes after picking an entry; `tocbot` runs as a single instance |
+| Code copy | `source/js/code-copy.js` | Hover copy button on code blocks with success feedback |
+| Images | `scripts/imageTag.js`, `source/js/lazy-image.js`, `source/js/lazy-img.js` | Image captions via `image-box`, lazy loading |
+| Reproducible builds | templates and generators | Tags, sub-categories, category post lists and the search index are all sorted internally, so two builds of the same source are byte-identical |
+| Accessibility | `layout/`, `source/css/search.css` | Mobile TOC button and highlight jump buttons are native `<button>` with `aria-label` / `aria-expanded`; the highlight counter is announced through `aria-live` |
+| Third-party asset cleanup | site repository hook | Unused CDN references in the theme head are removed by an `after_render:html` hook in the site repo; upstream markup is left untouched here |
 
-## Contents
-- [Documentation language](#documentation-language)
-- [Contents](#contents)
-- [Introduction](#introduction)
-- [Demo](#demo)
-- [Features](#features)
-- [Installation](#installation)
-- [Configuration](#configuration)
-  - [Add 'Tag', 'Category' Page](#add-tag-category-page)
-  - [MathJax (Render LaTeX formula)](#mathjax-render-latex-formula)
-  - [Image-title](#image-title)
-- [Customize](#customize)
-- [FAQ](#faq)
-- [Gallery](#gallery)
-- [LICENSE](#license)
+## Layout
 
+```
+layout/                     # EJS templates: _partial (header/toc/comments), _page (post/page/archive/category/tag)
+scripts/                    # hexo plugins: imageTag, lazy-image, search-index (build-time index generator)
+source/js/                  # script.js, search.js (in-page highlight), search-panel.js (panel), code-copy.js, lazy-img.js, tocbot.min.js
+source/css/                 # styl sources plus search.css (highlight bar, TOC button reset) and search-panel.css
+source/css/_page/_post/     # article and TOC drawer styles
+languages/                  # UI strings (default.yml contains no Chinese literals)
+search-index.baseline.json  # initial index-size baseline for the site smoke gate (+20% × article growth)
+```
 
-## Introduction
-An elegant, powerful, easy-to-read Hexo theme.
+## How search works
 
-## Demo
+**Build time** — `scripts/search-index.js` sorts articles by URL and emits:
 
-- [Demo site](https://siricee.github.io/hexo-theme-Chic)
-- <del>[Author's blog](https://siricee.github.io/)</del> (*Not using Hexo currently*)
+```
+public/search/manifest.json      list: hashed file names + article count
+public/search/meta.<hash>.json   one entry per article: url, title, categories, tags, all headings, excerpt, shard name
+public/search/ascii.<hash>.json  ASCII token inverted index (tokens length >= 2)
+public/search/cn.<hash>.json     Chinese bigram inverted index (document df >= 3)
+public/search/shard/<stable>.<hash>.json  per-section plain text plus the real anchor ids from rendered HTML
+```
 
-## Features
-- Appropriate blank blocks, elegant but not simple.
+Ordering is fixed inside the generator (terms lexicographically, meta by URL, shards in document order) and generation is one-way (`shards → meta → inverted → manifest`), so repeated builds are byte-identical.
 
-- Light/Dark theme, just one click.
+**Runtime** — opening the panel fetches only `manifest` and `meta`; the first keystroke fetches `ascii`, then `cn` in the background; shards are fetched in batches of 20 only when there are body candidates (continues while confirmed hits < 10). Candidate filtering is a strict **AND** over every token/bigram of the query, and hit counts are literal occurrences computed on shard text. Caching uses Cache Storage (memory fallback); the manifest is always revalidated, and only changed files are downloaded.
 
-- Abundant highlight mode.
-
-- Elaborately selected fonts, best reading experience. *'Microsoft Jhenghei' especially recommended.*
-
-- Auto fit Mobile and Screen responsively.
-
-- Support MathJax, support formula written in LaTeX.
-
-### New Features
-
-- **Fixed Navbar**: Desktop navbar fixed at top with shadow effect, supports light/dark theme
-- **Container Adaptation**: Padding-top added to prevent content being obscured by fixed navbar
-- **Horizontal Overflow Fix**: Prevents horizontal scrolling on mobile devices
-- **Responsive Navigation**: Mobile and tablet (< 1024px) automatically switches to drawer menu
-- **TOC Drawer**: Side drawer table of contents with floating action button, tap outside to close
-- **Responsive Tables**: Table content wraps automatically, no overflow
-- **Code Copy Button**: Shows on hover, one-click copy with success feedback
-- **Code Block Enhancement**: Horizontal scroll support, auto adapts to light/dark theme
-- **Navbar Search**: Integrated search for desktop and mobile
-- **Website Analytics**: Integrated umami analytics
-- **Internationalization**: Complete Simplified Chinese language support
-- **Copyright Module**: Configurable copyright notice with contact information
-- **Command-Panel Search**: navbar magnifier opens a floating panel (phone: bottom drawer / tablet: centered card / desktop: top-aligned) that searches titles, tags, category paths, in-article headings and body text; index built at compile time, queried client-side
-- **Accessibility**: The mobile TOC button and the in-article highlight jump buttons are native `<button>` elements with `aria-label` / `aria-expanded`; the highlight counter is announced via `aria-live`
+Token rules live in both the generator and the client — changing `analyzeQuery` in `search-panel.js` requires the same change in `search-index.js`.
 
 ## Installation
 
 ```bash
-cd your-blog/themes
-git clone https://github.com/meisijiya/Chic--Improved.git Chic
-# Modify theme setting in _config.yml to Chic.
+git submodule add https://github.com/meisijiya/Chic--Improved.git themes/Chic
+# or, after cloning the blog repo
+git submodule update --init
+
+# site _config.yml
+# theme: Chic
 ```
 
-## Configuration
-<details>
-<summary><mark>Click here to spread</mark></summary>
+The theme's `_config.yml` stylesheet list must include:
 
 ```yaml
-# Header
-navname: Bentham's Blog
-
-# navigatior items
-nav:
-  Posts: /archives
-  Categories: /category
-  Tags: /tag
-  About: /about
-
-# favicon
-favicon: /favicon.ico
-
-# Profile
-nickname: Jeremy Bentham
-
-### this variable is MarkDown form.
-description: Lorem ipsum dolor sit amet, **consectetur adipiscing elit.** <br>Fusce eget urna vitae velit *eleifend interdum at ac* nisi.
-avatar: /image/avatar.jpeg
-
-# main menu navigation
-## links key words should not be changed.
-## Complete url after key words.
-## Unused key can be commented out.
-links:
-  Blog: /archives
-#  Category:
-#  Tags:
-#  Link:
-#  Resume:
-#  Publish:
-#  Trophy:
-#  Gallary:
-#  RSS:
-#  AliPay:
-  ZhiHu: https://www.zhihu.com/people/sirice
-#  LinkedIn:
-#  FaceBook:
-#  Twitter:
-#  Skype:
-#  CodeSandBox:
-#  CodePen:
-#  Sketch:
-#  Gitlab:
-#  Dribble:
-  Instagram:
-  Reddit:
-#  YouTube:
-#  QQ:
-#  Weibo:
-#  WeChat:
-  Github: https://github.com/Siricee
-
-# how links show: you have 2 choice--text or icon.
-links_text_enable: false
-links_icon_enable: true
-
-# Post page
-## Post_meta
-post_meta_enable: true
-
-post_author_enable: true
-post_date_enable: true
-post_category_enable: true
-## Post copyright
-post_copyright_enable: true
-
-post_copyright_author_enable: true
-post_copyright_permalink_enable: true
-post_copyright_license_enable: true
-post_copyright_license_text: Copyright (c) 2019 <a href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE
-post_copyright_slogan_enable: true
-post_copyright_slogan_text: Do you believe in <strong>DESTINY<strong>?
-## toc
-post_toc_enable: true
-
-# Page
-page_title_enable: true
-
-# Date / Time format
-## Hexo uses Moment.js to parse and display date
-## You can customize the date format as defined in
-## http://momentjs.com/docs/#/displaying/format/
-date_format: MMMM D, YYYY
-time_format: H:mm:ss
-
-# stylesheets loaded in the <head>
 stylesheets:
   - /css/style.css
-
-# scripts loaded in the end of the body
-scripts:
-  - /js/script.js
-  - /js/tocbot.min.js
-    # tscanlin/tocbot: Build a table of contents from headings in an HTML document.
-    # https://github.com/tscanlin/tocbot
-
-
-# plugin functions
-## Mathjax: Math Formula Support
-## https://www.mathjax.org
-mathjax:
-  enable: true
-  import: demand # global or demand
-  ## global: all pages will load mathjax,this will degrade performance and some grammers may be parsed wrong.
-  ## demand: Recommend option,if your post need fomula, you can declare 'mathjax: true' in Front-matter
+  - /css/search.css
+  - /css/search-panel.css
 ```
-</details>
-<br>
 
-### Add 'Tag', 'Category' Page
+All other options (`nav`, `links`, `post_copyright_*`, `post_toc_enable`, `stylesheets` / `scripts`) match upstream — see the upstream README.
 
-There is no 'tag' or 'category' page in the site as it initializes. If you need it, please follow the steps below.
+## Gotchas
 
-1. execute commands
-```bash
-hexo new page tag
-hexo new page category
-```
-2. enter the dictionary
-```bash
-cd source/tag
-```
-3. add 'layout' key
-```yaml
-// source\tag\index.md
----
-title: Tag
-layout: tag
----
-```
-4. Do so with the category page with `Category` as title and `category` as layout.
+- **Only `.js` files in `scripts/`**: hexo loads every file in a theme's `scripts/` directory as a plugin; a stray `.json` fails with `Script load failed`. That is why the size baseline lives in the theme root.
+- **Unwrapping `<mark>` must be in place**: walk the `mark` nodes and replace them with text nodes; rewriting `.post-content`'s `innerHTML` silently drops the listeners `code-copy.js` attached to `.copy-btn`.
+- **The 1023px breakpoint must match between CSS and JS**: a 1px mismatch between the TOC drawer's `display:none` rule and the `matchMedia` that moves `.tocbot-list` makes the TOC disappear in that width range.
+- **Keep the file name `source/js/search.js`**: the search entry code is gone, but the in-page highlight helpers and the mobile menu `mobileBtn()` still live there, and template inline `onclick` handlers depend on those `window` names.
 
-### MathJax (Render LaTeX formula)
+## License
 
-Related config file (`Chic/_config.yml`):
-```yaml
-# plugin functions
-## Mathjax: Math Formula Support
-## https://www.mathjax.org
-mathjax:
-  enable: true
-  import: global # global or demand
-  ## global: all pages will load mathjax,this will degrade performance and some grammers may be parsed wrong.
-  ## demand: if your post need fomula, you can declare 'mathjax: true' in Front-matter
-```
-`mathjax` uses the keywords below:
-- `enable`: value `true` enables mathjax (default value `true`); value `false` disables it.
-- `import`: this key sets mathjax load method, options can be `global` or `demand`.
-  - `global`: global import, all pages will load script. It's convenient, but **it may cause some MarkDown grammars to be parsed wrong**. For example, consecutive `$$` will be rendered as a formula; Besides, global import will waste performance in pages without any formula.
-  - `demand`: [Recommended] Import mathjax when you need it. After you set this value, if you need to use formula, just declare it in the post Front-matter. Here is an example:
-    ```yaml
-    ---
-    title: MathJax Test
-    date: 2019-07-05 21:27:59
-    tags:
-    mathjax: true # add this statement, MathJax will be enabled in this post.
-    ---
-    ```
-LaTeX grammars will not be illustrated in this doc. In Chic theme, single '$' rounded statement is regarded as inline formula like `$f(x)=ax+b$`; double '$' rounded statement is regarded as block formula like `$$f(x)=ax+b$$`. More information please read LaTeX doc and [Formula test page in Demo Site](https://siricee.github.io/hexo-theme-Chic/2019/07/05/MathJax_test/).
+Inherited from upstream: <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 
-### Image-title
-
-You have 2 methods to import images in your posts:
- 
- - image import with GFM (without image-title)
-   ```
-   ![pic](picUrl)
-   ```
- - hexo built-in image tag (with image-title)
-   ```
-   {% img [class names] /path/to/image [width] [height] '"alt text" "title text"' %}
-   ```
-So if you want to import as fast as possible, you can use GFM, and this way will also get the best adaptability. 
-
-**If you want to display image-title, you should use hexo built-in image tag.**
-- `"alt text"` is used when the image doesn't load or something went wrong in that image (404).
-- `"title text"` **will be displayed below the image.**
-
-You can preview image-title and sample code in [Demo site](https://siricee.github.io/hexo-theme-Chic/2019/06/05/markdown_test/#Image)
-
-## Customize
-
-- Highlight Style: modify stylus file: `hexo-theme-Chic\themes\Chic\source\css\style`
-  
-  ```css
-  // light theme code-block style
-  body:not(.dark-theme) {
-    @import "_highlight/atelier-forest-light.styl";
-  }
-  // dark theme code-block style
-  body.dark-theme {
-    @import "_highlight/darkula.styl";
-  }
-  ```
-
-  change stylesheet file path in `_highlight` dictionary.
-
-  It should be noted here that the style packages for the **light and dark themes may not be completely identical**. For example, settings such as line height may vary. It is recommended to use different modes of the same code theme package as much as possible, such as `atelier-savanna-light.styl` and `atelier-savanna-dark.styl`.
-
-- Customize stylesheets in this [stylus](https://stylus-lang.com/) file:
-
-   `hexo-theme-Chic\themes\Chic\source\css\custom.styl`
-
-- Customize javascripts in the dictionary:
-
-  `hexo-theme-Chic\themes\Chic\source\js`
-
-  Then add declaration in `_config.yml`using the keyword 'script'.
-
-## FAQ
-
-1. I deployed my site on a second-level url (such as username.github.io/blog), and my css, avatar and other sources are missing (404 error)
-
-    Answer: You need to change some URLs in root config keyword. For instance:
-    ```yaml
-    # (blog/_config.yml)
-
-    # URL
-    ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-    url: https://siricee.github.io/hexo-theme-Chic/  # this is your deploy url.
-    root: /hexo-theme-Chic/  # this is your root folder url.
-    permalink: :year/:month/:day/:title/
-    permalink_defaults:
-    ```
-
-2. How to set the dark theme as default for whole site automatically?
-   
-   Answer: You need to change some code in `themes\Chic\source\js\script.js`, function `doucument.ready` as shown below.
-
-   ```javascript
-    document.ready(
-        // toggleTheme function.
-        // this script shouldn't be changed.
-        () => {
-            const pagebody = document.getElementsByTagName('body')[0]
-
-            const default_theme = 'light' // change this value to 'dark'
-   ```
-
-   Now, you have already set the dark theme as default successfully.
-
-3. More questions will be added...
-
-## Gallery
-![screely-1560228577821.png](https://i.loli.net/2019/06/12/5d00a0850285252790.png)
-![screely-1560228791041.png](https://i.loli.net/2019/06/12/5d00a0856063661133.png)
-![screely-1560228621288.png](https://i.loli.net/2019/06/12/5d00a084e29cd40271.png)
-![screely-1560228761180.png](https://i.loli.net/2019/06/12/5d00a0855d28072392.png)
-
-![smartmockups_jwrd4ru3.png](https://i.loli.net/2019/06/12/5d00a085d115d16700.png)
-
-![smartmockups_jwrd9y4r.png](https://i.loli.net/2019/06/12/5d00a085ec26284832.png)
-
-## LICENSE
-
-![](https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png)
-
-This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
+Design and upstream work belong to Siricee; this fork's changes are released under the same license.

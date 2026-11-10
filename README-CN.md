@@ -1,351 +1,93 @@
-<h1 align="center"><a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic Theme</a></h1>
+<h1 align="center">Chic（老江湖的定制版）</h1>
 
 <p align="center">
-<img src="https://i.loli.net/2019/06/12/5d006bd289aa325037.png" alt="Chic theme">
+派生自 <a href="https://github.com/Siricee/hexo-theme-Chic">Siricee/hexo-theme-Chic</a>，本仓长期维护「欢迎来到老江湖的博客」实际在用的主题版本。
 </p>
 
-> Chic,法语词意同'Elegant'
+> 与上游的差别不是一次性的改造，而是持续维护的现状：站内搜索换成命令面板 + 构建期分段索引，目录布局、无障碍与构建可复现性都按自己的站点需求调整过。
 
-<p align="center">
-<img alt="Author" src="https://img.shields.io/badge/Author-Sirice-lightgray.svg"/>
-<img alt="Node" src="https://img.shields.io/badge/Node-6.0%2B-43853d.svg"/>
-<img alt="Hexo" src="https://img.shields.io/badge/Hexo-3.0+-0e83cd.svg"/>
-<img alt="Device" src="https://img.shields.io/badge/Device-responsive-orange.svg"/>
-<img alt="Build Status" src="https://img.shields.io/badge/build-passing-brightgreen"/>
-<img alt="Version" src="https://img.shields.io/badge/version-2.0-blue"/>
-</p>
+- 上游主题：<https://github.com/Siricee/hexo-theme-Chic>
+- 本仓：<https://github.com/meisijiya/Chic--Improved>
+- 使用方式：作为博客仓的 git submodule 挂在 `themes/Chic`
+- 上游 README 里的完整配置项（导航、侧栏 links、版权、MathJax、日期格式等）仍然适用；本文件只记**本仓相对上游的现状**。
 
-## 文档语言
+## 定制清单（相对上游）
 
-- [中文文档](README-CN.md)
-- [English](README.md)
+| 功能 | 相关文件 | 说明 |
+|---|---|---|
+| 站内搜索面板 | `source/js/search-panel.js`、`source/css/search-panel.css`、`layout/_partial/header.ejs` | 导航栏放大镜打开浮层，三档形态（手机底部抽屉 / 大屏居中卡片 / PC 顶部对齐）；结果分段（标题 / 标签 / 分类目录 / 小节目录 / 正文），段头可折叠，候选可分页加载 |
+| 构建期索引 | `scripts/search-index.js`、`search-index.baseline.json` | 构建时产出 `public/search/`：`manifest` + `meta` + `ascii`/`cn` 倒排 + 按小节切的正文分片，文件名带内容哈希且纯 ASCII |
+| 页内高亮 | `source/js/search.js`、`layout/_page/post.ejs` | 检索结果带 `?sq=<关键词>#<小节锚点>`，落地高亮全篇并浮出「第 N/M 处」↑ ↓ 与关闭按钮 |
+| 导航返回 | `layout/_partial/header.ejs` | 顶部 `← 返回`，优先回 `document.referrer` 的同源上一页 |
+| 目录布局 | `layout/_partial/toc.ejs`、`toc-mobile.ejs`、`source/css/_page/_post/*.styl` | 平板/小桌面改流式两栏（固定侧栏不再压正文）；移动抽屉点目录项自动收起；`tocbot` 全站单实例 |
+| 代码复制 | `source/js/code-copy.js` | 代码块悬停出现复制按钮，复制成功给反馈 |
+| 图片 | `scripts/imageTag.js`、`source/js/lazy-image.js`、`source/js/lazy-img.js` | 图片标题转 `image-box`、图片懒加载 |
+| 构建可复现 | 模板与生成器内部 | 标签、子分类、分类页文章列表、搜索索引一律内部排序，同一份源码两次构建产物字节一致 |
+| 无障碍 | `layout/` 与 `source/css/search.css` | 移动目录按钮、高亮跳转按钮改原生 `<button>`；补 `aria-label` / `aria-expanded`；高亮计数用 `aria-live` 播报 |
+| 第三方资源治理 | 与站点仓配合 | 主题 head 里用不到的 CDN 引用由站点侧 `after_render:html` 钩子移除，本仓不删上游标记 |
 
-## Contents 目录
+## 目录结构
 
-- [文档语言](#文档语言)
-- [Contents 目录](#contents-目录)
-- [Introduction 介绍](#introduction-介绍)
-- [Demo 演示](#demo-演示)
-- [Features 特点](#features-特点)
-- [Installation 安装](#installation-安装)
-- [Configuration 配置](#configuration-配置)
-  - [添加 Tag、Category 页面](#添加-tagcategory-页面)
-  - [开启 MathJax 支持（数学公式）](#开启-mathjax-支持数学公式)
-  - [图片标题](#图片标题)
-- [Customize 自定义](#customize-自定义)
-- [FAQ 提问](#faq-提问)
-- [Gallary 图片展示](#gallary-图片展示)
-- [LICENSE 开源许可](#license-开源许可)
-
-## Introduction 介绍
-
-优雅、功能全面、阅读友好的 hexo 主题。
-
-## Demo 演示
-
-- [Demo site](https://siricee.github.io/hexo-theme-Chic)
-- <del>[作者的博客](https://siricee.github.io/)</del> (_不再使用 hexo 驱动_)
-
-## Features 特点
-
-- 恰到好处的留白，优雅却不简陋。
-- 夜间模式主题一键切换。
-- 多种代码高亮方案。
-- 精心挑选的字体，最好的阅读体验。\* _特别推荐 微软正黑_
-- 响应式适配移动端/桌面端。
-- 支持 MathJax，支持 LaTeX 语法的数学公式
-
-### 新增功能
-
-- **固定导航栏**：桌面端导航栏固定在顶部，添加阴影效果，支持亮色/暗色主题切换
-- **容器适配**：解决固定导航栏遮挡内容的问题，页面顶部增加适当留白
-- **横向溢出修复**：防止移动端页面出现横向滚动条
-- **响应式导航**：移动端和平板（< 1024px）自动切换为抽屉式导航菜单
-- **目录抽屉**：文章页侧边抽屉式目录，带有悬浮按钮，点击外部区域关闭
-- **表格自适应**：表格内容自动换行，不再溢出容器
-- **代码复制按钮**：悬停显示一键复制按钮，支持复制成功反馈
-- **代码块优化**：支持横向滚动，自动适配亮色/暗色主题
-- **导航栏搜索**：集成桌面端和移动端搜索功能
-- **网站统计**：集成 umami 统计功能
-- **国际化**：完整的简体中文语言支持
-- **版权模块**：可配置的版权声明，包含联系方式
-- **命令面板式搜索**：导航栏放大镜打开浮层面板（手机档底部抽屉 / 大屏居中卡片 / PC 顶部对齐），检索文章标题、标签、分类目录、页内小节目录与正文；索引构建期生成、客户端检索
-- **无障碍改进**：移动端目录按钮与文章内高亮跳转按钮改用原生 `<button>`，补齐 `aria-label` / `aria-expanded`，高亮计数通过 `aria-live` 播报
-
-## Installation 安装
-
-```bash
-cd your-blog/themes
-git clone https://github.com/meisijiya/Chic--Improved.git Chic
-# 修改主题配置 _config.yml 中的 theme 为 Chic
+```
+layout/                     # EJS 模板：_partial（header/toc/comments）、_page（post/page/archive/category/tag）
+scripts/                    # hexo 插件：imageTag、lazy-image、search-index（构建期索引生成器）
+source/js/                  # script.js、search.js（页内高亮）、search-panel.js（面板）、code-copy.js、lazy-img.js、tocbot.min.js
+source/css/                 # styl 源码 + 独立样式表 style.css 之外：search.css（高亮浮条与目录按钮重置）、search-panel.css
+source/css/_page/_post/      # 文章页与目录抽屉的样式
+languages/                  # 界面文案（default.yml 不含中文字面量）
+search-index.baseline.json  # 首次实现的索引体积基线，供站点冒烟断言按「基线 +20% × 文章数同比」判定
 ```
 
-## Configuration 配置
+## 站内搜索怎么工作
 
-<details>
-<summary><mark>点击展开配置文件</mark></summary>
+**构建期**：`scripts/search-index.js` 按文章 url 排序生成
+
+```
+public/search/manifest.json      清单：三份索引的带哈希文件名 + 文章数
+public/search/meta.<hash>.json   每篇一条：url、标题、分类、标签、全部小节标题、摘要、分片名
+public/search/ascii.<hash>.json  ASCII 词倒排（token 长度 ≥2）
+public/search/cn.<hash>.json     中文二元组倒排（篇级 df ≥ 3）
+public/search/shard/<stable>.<hash>.json  按小节切的正文纯文本 + 渲染后 HTML 的真实锚点 id
+```
+
+排序在生成器内部固定（terms 字典序、meta 按 url、分片按正文顺序），生成顺序单向 `分片 → meta → 倒排 → manifest`，所以同样的源码两次构建产物字节一致。
+
+**运行期**：打开面板只取 `manifest` 与 `meta`；首次输入才拉 `ascii`，到位后后台补 `cn`；有正文候选时按批取分片（20 篇/批，已确认命中不足 10 且候选未尽继续拉）。候选过滤是 **AND**（查询切出的每个 token / 二元组都必须在该篇出现），命中次数在分片纯文本上数字面出现次数。缓存用 Cache Storage（不可用退内存），清单每次网络重取，文件名变了才重下。
+
+索引产物与客户端分词规则必须一起改：改 `search-index.js` 的 token 口径时，`search-panel.js` 的 `analyzeQuery` 要同步。
+
+## 安装
+
+```bash
+# 作为子模块挂到博客仓
+git submodule add https://github.com/meisijiya/Chic--Improved.git themes/Chic
+# 或换机后初始化
+git submodule update --init
+
+# 站点 _config.yml 指定主题
+# theme: Chic
+```
+
+主题 `_config.yml` 里与搜索相关的样式表必须包含：
 
 ```yaml
-# Header
-navname: Bentham's Blog
-
-# navigatior items
-nav:
-  Posts: /archives
-  Categories: /category
-  Tags: /tag
-  About: /about
-
-# favicon
-favicon: /favicon.ico
-
-# Profile
-nickname: Jeremy Bentham
-
-### this variable is MarkDown form.
-description: Lorem ipsum dolor sit amet, **consectetur adipiscing elit.** <br>Fusce eget urna vitae velit *eleifend interdum at ac* nisi.
-avatar: /image/avatar.jpeg
-
-# main menu navigation
-## links key words should not be changed.
-## Complete url after key words.
-## Unused key can be commented out.
-links:
-  Blog: /archives
-  #  Category:
-  #  Tags:
-  #  Link:
-  #  Resume:
-  #  Publish:
-  #  Trophy:
-  #  Gallary:
-  #  RSS:
-  #  AliPay:
-  ZhiHu: https://www.zhihu.com/people/sirice
-  #  LinkedIn:
-  #  FaceBook:
-  #  Twitter:
-  #  Skype:
-  #  CodeSandBox:
-  #  CodePen:
-  #  Sketch:
-  #  Gitlab:
-  #  Dribble:
-  Instagram:
-  Reddit:
-  #  YouTube:
-  #  QQ:
-  #  Weibo:
-  #  WeChat:
-  Github: https://github.com/Siricee
-
-# how links show: you have 2 choice--text or icon.
-links_text_enable: false
-links_icon_enable: true
-
-# Post page
-## Post_meta
-post_meta_enable: true
-
-post_author_enable: true
-post_date_enable: true
-post_category_enable: true
-## Post copyright
-post_copyright_enable: true
-
-post_copyright_author_enable: true
-post_copyright_permalink_enable: true
-post_copyright_license_enable: true
-post_copyright_license_text: Copyright (c) 2019 <a href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE
-post_copyright_slogan_enable: true
-post_copyright_slogan_text: Do you believe in <strong>DESTINY<strong>?
-## toc
-post_toc_enable: true
-
-# Page
-page_title_enable: true
-
-# Date / Time format
-## Hexo uses Moment.js to parse and display date
-## You can customize the date format as defined in
-## http://momentjs.com/docs/#/displaying/format/
-date_format: MMMM D, YYYY
-time_format: H:mm:ss
-
-# stylesheets loaded in the <head>
 stylesheets:
   - /css/style.css
-
-# scripts loaded in the end of the body
-scripts:
-  - /js/script.js
-  - /js/tocbot.min.js
-    # tscanlin/tocbot: Build a table of contents from headings in an HTML document.
-    # https://github.com/tscanlin/tocbot
-
-# plugin functions
-## Mathjax: Math Formula Support
-## https://www.mathjax.org
-mathjax:
-  enable: true
-  import: demand # global or demand
-  ## global: all pages will load mathjax,this will degrade performance and some grammers may be parsed wrong.
-  ## demand: Recommend option,if your post need fomula, you can declare 'mathjax: true' in Front-matter
+  - /css/search.css
+  - /css/search-panel.css
 ```
 
-</details>
-<br>
+其余配置项（`nav`、`links`、`post_copyright_*`、`post_toc_enable`、`stylesheets`/`scripts` 列表等）与上游一致，见上游 README。
 
-### 添加 Tag、Category 页面
+## 注意事项
 
-Hexo 初始化没有 tag、category 页面，需要自行添加，本主题请按以下步骤进行:<br>
-
-1. 执行命令
-
-```bash
-hexo new page tag
-hexo new page category
-```
-
-2. 进入页面目录
-
-```bash
-cd source/tag
-```
-
-3. 增加 layout 字段
-
-```yaml
-// source\tag\index.md
----
-title: Tag
-layout: tag
----
-```
-
-4. category 页面同理，layout 字段键值为 category。 <br>
-
-### 开启 MathJax 支持（数学公式）
-
-相关配置文件内容（`Chic/_config.yml`）：
-
-```yaml
-# plugin functions
-## Mathjax: Math Formula Support
-## https://www.mathjax.org
-mathjax:
-  enable: true
-  import: global # global or demand
-  ## global: all pages will load mathjax,this will degrade performance and some grammers may be parsed wrong.
-  ## demand: if your post need fomula, you can declare 'mathjax: true' in Front-matter
-```
-
-`mathjax`有如下字段：
-
-- `enable`:值为 true 为开启该功能（默认开启）；false 为关闭
-- `import`:该字段为 mathjax 的加载方式，可选值为`global`和`demand`。
-  - `global`：全局引入，所有页面均加载。好处是便利，缺点是可能会导致部分 markdown 语法被错误解析，比如连续`$$`会被解析为公式；而且全局引入会在没有公式的页面明显浪费页面性能。
-  - `demand`【推荐方式】：按需引入。使用方法为在 config 中设置该字段后，文章中如果需要使用 mathjax，在 Front-matter 中声明即可
-    ```yaml
-    ---
-    title: MathJax Test
-    date: 2019-07-05 21:27:59
-    tags:
-    mathjax: true # 加入这个声明，这篇文章就会开启mathjax渲染
-    ---
-    ```
-    LaTeX 语法这里不做解释，本主题中，单 dollar 符号包围的为行内公式，例：`$f(x)=ax+b$`，双 dollar 符号包围的为块公式，例`$$f(x)=ax+b$$`更多写法请参考 LaTeX 和[Demo site 中的公式测试页面](https://siricee.github.io/hexo-theme-Chic/2019/07/05/MathJax_test/)。
-
-### 图片标题
-
-在 Hexo 中，你有两种方式引入图片：
-
-- GFM 语法直接引入（不显示图片标题）
-  ```
-  ![pic](picUrl)
-  ```
-- Hexo 内置标签系统-图片标签（显示图片标题）
-  `    {% img [class names] /path/to/image [width] [height] '"alt text" "title text"' %}
-   `
-  所以如果你仅仅想方便快捷引入图片，那你应该使用 GFM 语法，这种方式也是兼容性最好的方案。
-
-但如果你需要显示**图片标题**，你就应该使用第二种方案，**图片标签方式**。
-
-- `"alt text"` 用来显示当图片加载失败时垫底的提示文字。
-- `"title text"` 将会被显示到图片下方作为图片标题。
-
-你可以在 [Demo site](https://siricee.github.io/hexo-theme-Chic/2019/06/05/markdown_test/#Image) 中查看图片标题的效果和示例语法。
-
-## Customize 自定义
-
-- 代码高亮风格 在 `hexo-theme-Chic\themes\Chic\source\css\style.styl` 中
-
-  ```css
-  // light theme code-block style
-  body:not(.dark-theme) {
-    @import "_highlight/atelier-forest-light.styl"; // 亮色主题
-  }
-  // dark theme code-block style
-  body.dark-theme {
-    @import "_highlight/darkula.styl";              // 暗色主题
-  }
-  ```
-  将预设地址改为 `_highlight` 文件夹中的 stylus 文件即可更换代码高亮风格。
-
-  此处需注意 亮色和暗色主题的样式包未必完全一致，如行高等设定，推荐尽量使用同一套代码主题包的不同模式，如 `atelier-savanna-light.styl` 和 `atelier-savanna-dark.styl`
-
-- 自定义 css(stylus 语法) 您可以在 `hexo-theme-Chic\themes\Chic\source\css\custom.styl` 路径文件中添加 css 规则
-
-- 自定义 JavaScript 您可以在 `hexo-theme-Chic\themes\Chic\source\js` 路径中添加 js 脚本，并在\_config.yml 中 `script` 字段添加声明。
-
-## FAQ 提问
-
-1. 我在二级地址（非 github page 根 repo，即 username.github.io/Blog）上部署了 hexo，为什么 css、avatar 等资源都 404 了？
-
-   答：此处需要另外填写主配置文件 URL 字段。以该主题 repo 为例：
-
-   ```yaml
-   # (blog/_config.yml)
-
-   # URL
-   ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-   url: https://siricee.github.io/hexo-theme-Chic/ # 此处为你的部署url
-   root: /hexo-theme-Chic/ # 此处为你的项目根文件夹url。
-   permalink: :year/:month/:day/:title/
-   permalink_defaults:
-   ```
-
-2. 我想将黑色主题设为默认全局主题该怎么做？
-
-   答：此处只需要改一下`themes\Chic\source\js\script.js`中`doucument.ready`函数的内容。代码如下
-
-   ```javascript
-    document.ready(
-        // toggleTheme function.
-        // this script shouldn't be changed.
-        () => {
-            const pagebody = document.getElementsByTagName('body')[0]
-
-            const default_theme = 'light' // 改为 'dark'
-   ```
-
-   即可实现效果。
-
-3. 常见问题待补充……
-
-## Gallary 图片展示
-
-![screely-1560228577821.png](https://i.loli.net/2019/06/12/5d00a0850285252790.png)
-![screely-1560228791041.png](https://i.loli.net/2019/06/12/5d00a0856063661133.png)
-![screely-1560228621288.png](https://i.loli.net/2019/06/12/5d00a084e29cd40271.png)
-![screely-1560228761180.png](https://i.loli.net/2019/06/12/5d00a0855d28072392.png)
-
-![smartmockups_jwrd4ru3.png](https://i.loli.net/2019/06/12/5d00a085d115d16700.png)
-
-![smartmockups_jwrd9y4r.png](https://i.loli.net/2019/06/12/5d00a085ec26284832.png)
+- **`scripts/` 只放 `.js`**：hexo 会把主题 `scripts/` 下所有文件当插件加载，放一个 `.json` 就报 `Script load failed`（体积基线因此放在主题根目录）。
+- **摘除 `<mark>` 必须就地解包**：遍历 `mark` 用文本节点替换，不能重写 `.post-content` 的 `innerHTML`，否则 `code-copy.js` 绑在 `.copy-btn` 上的监听会静默失效。
+- **1023px 断点在 CSS 与 JS 里必须一致**：目录抽屉的 `display:none` 断点与搬移 `.tocbot-list` 的 `matchMedia` 差 1px，该宽度区间的目录会整个消失。
+- **`source/js/search.js` 文件名保留**：检索入口已退役，但页内高亮三件套与移动端汉堡菜单的 `mobileBtn()` 还在这份文件里，模板内联 `onclick` 依赖 `window` 上的这些名字。
 
 ## LICENSE 开源许可
 
-![](https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png)
+沿用上游许可：<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>。
 
-This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
+上游作者与设计归 Siricee；本仓的定制改动同样以同一许可发布。

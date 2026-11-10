@@ -1,7 +1,7 @@
 {
-  "name": "hexo-theme-chic",
+  "name": "hexo-theme-chic-meisijiya",
   "version": "2.0.0",
-  "description": "An elegant,powerful,easy-to-read Hexo theme.",
+  "description": "Chic 主题（老江湖定制版）：命令面板式站内搜索与构建期分段索引，目录布局/无障碍/构建可复现性按本站需求调整",
   "main": "index.js",
   "scripts": {
     "test": "test"
@@ -13,5 +13,10 @@
     "sirice",
     "hexo-theme"
   ],
-  "author": "Sirice"
+  "author": "Siricee (upstream) / meisijiya (fork)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meisijiya/Chic--Improved.git"
+  },
+  "homepage": "https://github.com/meisijiya/Chic--Improved"
 }
