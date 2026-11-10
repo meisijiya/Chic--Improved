@@ -21,7 +21,7 @@
 | 导航返回 | `layout/_partial/header.ejs` | 顶部 `← 返回`，优先回 `document.referrer` 的同源上一页 |
 | 目录布局 | `layout/_partial/toc.ejs`、`toc-mobile.ejs`、`source/css/_page/_post/*.styl` | 平板/小桌面改流式两栏（固定侧栏不再压正文）；移动抽屉点目录项自动收起；`tocbot` 全站单实例 |
 | 代码复制 | `source/js/code-copy.js` | 代码块悬停出现复制按钮，复制成功给反馈 |
-| 图片 | `scripts/imageTag.js`、`source/js/lazy-image.js`、`source/js/lazy-img.js` | 图片标题转 `image-box`、图片懒加载 |
+| 图片 | `scripts/imageTag.js`、`scripts/lazy-image.js`、`source/js/lazy-img.js` | 图片标题转 `image-box`、图片懒加载 |
 | 构建可复现 | 模板与生成器内部 | 标签、子分类、分类页文章列表、搜索索引一律内部排序，同一份源码两次构建产物字节一致 |
 | 无障碍 | `layout/` 与 `source/css/search.css` | 移动目录按钮、高亮跳转按钮改原生 `<button>`；补 `aria-label` / `aria-expanded`；高亮计数用 `aria-live` 播报 |
 | 第三方资源治理 | 与站点仓配合 | 主题 head 里用不到的 CDN 引用由站点侧 `after_render:html` 钩子移除，本仓不删上游标记 |

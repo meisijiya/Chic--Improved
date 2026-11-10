@@ -21,7 +21,7 @@ Forked from <a href="https://github.com/Siricee/hexo-theme-Chic">Siricee/hexo-th
 | Back link | `layout/_partial/header.ejs` | `← 返回` returns to the same-origin `document.referrer` |
 | TOC layout | `layout/_partial/toc*.ejs`, `source/css/_page/_post/*.styl` | Tablet widths use a flowing two-column layout (the fixed sidebar no longer overlaps text); the mobile drawer closes after picking an entry; `tocbot` runs as a single instance |
 | Code copy | `source/js/code-copy.js` | Hover copy button on code blocks with success feedback |
-| Images | `scripts/imageTag.js`, `source/js/lazy-image.js`, `source/js/lazy-img.js` | Image captions via `image-box`, lazy loading |
+| Images | `scripts/imageTag.js`, `scripts/lazy-image.js`, `source/js/lazy-img.js` | Image captions via `image-box`, lazy loading |
 | Reproducible builds | templates and generators | Tags, sub-categories, category post lists and the search index are all sorted internally, so two builds of the same source are byte-identical |
 | Accessibility | `layout/`, `source/css/search.css` | Mobile TOC button and highlight jump buttons are native `<button>` with `aria-label` / `aria-expanded`; the highlight counter is announced through `aria-live` |
 | Third-party asset cleanup | site repository hook | Unused CDN references in the theme head are removed by an `after_render:html` hook in the site repo; upstream markup is left untouched here |
