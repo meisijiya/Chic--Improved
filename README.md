@@ -72,7 +72,7 @@ An elegant, powerful, easy-to-read Hexo theme.
 - **Website Analytics**: Integrated umami analytics
 - **Internationalization**: Complete Simplified Chinese language support
 - **Copyright Module**: Configurable copyright notice with contact information
-- **Lazy Search Index**: The (multi-MB) `search.xml` index is fetched on first interaction — clicking the search icon or focusing the input — instead of on page load
+- **Command-Panel Search**: navbar magnifier opens a floating panel (phone: bottom drawer / tablet: centered card / desktop: top-aligned) that searches titles, tags, category paths, in-article headings and body text; index built at compile time, queried client-side
 - **Accessibility**: The mobile TOC button and the in-article highlight jump buttons are native `<button>` elements with `aria-label` / `aria-expanded`; the highlight counter is announced via `aria-live`
 
 ## Installation

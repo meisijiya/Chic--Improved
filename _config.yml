@@ -99,6 +99,7 @@ time_format: H:mm:ss
 stylesheets:
   - /css/style.css
   - /css/search.css
+  - /css/search-panel.css
 
 # scripts loaded in the end of the body
 scripts:
