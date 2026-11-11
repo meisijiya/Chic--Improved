@@ -56,7 +56,7 @@ function splitSections(html) {
     } else {
       sections[sections.length - 1].x = toPlainText(html.slice(cursor, match.index));
     }
-    sections.push({ i: decodeEntities(idMatch[1]), t: toPlainText(match[3]), x: '' });
+    sections.push({ i: decodeEntities(idMatch[1]), t: toPlainText(match[3]), l: Number(match[1]), x: '' });
     cursor = match.index + match[0].length;
   }
   if (sections.length === 0) {
@@ -119,12 +119,14 @@ hexo.extend.generator.register('search-index', function (locals) {
   const meta = [];
   posts.forEach(({ post, url }) => {
     const sections = splitSections(post.content || '');
-    const shard = { v: 1, u: url, t: post.title || '', s: sections };
+    // v2：分片小节补标题级别 l（2~6），助手按它算 children；旧消费方忽略新字段
+    const shard = { v: 2, u: url, t: post.title || '', s: sections };
     const shardBytes = JSON.stringify(shard);
     const name = `${hash6('sha1', url)}.${hash6('sha256', shardBytes)}.json`;
     files.push({ path: `search/shard/${name}`, data: shard });
 
-    // ③ 元数据：全部小节标题不截断
+    // ③ 元数据：全部小节标题不截断。h 保持字符串数组——站内搜索面板直接对它调
+    //    toLowerCase()，改形状会让目录命中抛错；级别只进分片（s[].l）。
     const headings = sections.filter((sec) => sec.i).map((sec) => sec.t);
     const plain = toPlainText(post.content || '');
     meta.push({
@@ -170,7 +172,7 @@ hexo.extend.generator.register('search-index', function (locals) {
   files.push({
     path: 'search/manifest.json',
     data: {
-      v: 1,
+      v: 2,
       meta: metaOut.name,
       ascii: asciiOut.name,
       cn: cnOut.name,
